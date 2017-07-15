@@ -7,4 +7,4 @@ yet sufficient for making prediction. It combines two modular components, genera
 well together. The generator specifies a distribution over text fragments as candidate rationales and these are passed through
 the encoder for prediction. Rationales are never given during training. Instead, the model is regularized by desiderata for 
 rationales.
-![image](https://user-images.githubusercontent.com/6012792/28242041-5fea33de-696f-11e7-99e7-1385e1d291fc.png)
+### ![image](https://user-images.githubusercontent.com/6012792/28242041-5fea33de-696f-11e7-99e7-1385e1d291fc.png)
