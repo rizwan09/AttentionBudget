@@ -1,6 +1,6 @@
 
-### Rationalizing Neural Predictions, Tao Lei et al., EMNLP, 2016
-Abstract:
+## Rationalizing Neural Predictions, Tao Lei et al., EMNLP, 2016
+### Abstract:
  
 This paper learns to extract pieces of input text as justifications – rationales – that are tailored to be short and coherent,
 yet sufficient for making prediction. It combines two modular components, generator and encoder, which are trained to operate 
