@@ -19,6 +19,24 @@ from extended_layers import ExtRCNN, ExtLSTM, ZLayer
 total_encode_time = 0
 total_generate_time = 0
 
+def get_sparse(o_x):
+    a = np.nonzero(o_x)
+    b = [[] for i in range(len(o_x))]
+    for n in range(len(a[0])):
+        b[a[0][n]].append(o_x[a[0][n]][a[1][n]].astype(int))
+
+
+    return b
+
+
+def remove_non_selcted(bx, bz, padding_id):
+    assert bx.ndim == bz.ndim == 2
+    r = (bz * bx).transpose()
+    r[r == padding_id] = 0
+    bx_t = get_sparse(r)
+    max_len = max(len(x) for x in bx_t)
+    return np.column_stack([np.pad(x, (max_len - len(x), 0), "constant", constant_values=padding_id) for x in bx_t])
+
 class Generator(object):
 
     def __init__(self, args, embedding_layer, nclasses):
@@ -622,8 +640,17 @@ class Model(object):
             generator_time = time.time() - start_generate_time
             generate_total_time += generator_time
 
+            #print 'bx[0]: ', bx[0], len (bx[0]), '\nbz[0]: ' , bz[0], len (bz[0])
+            #print 'bx[60]: ', bx[60], len (bx[60]), '\nbz[60]: ' , bz[60], len (bz[60])
+            #exit()
+
             start_encode_time = time.time()
-            o, e, d = debug_func_enc(bx, by, bz) # o, e, d = debug_func_enc(bx, by, bz)
+            bx_t = np.array(remove_non_selcted(bx, bz,  padding_id)).astype(np.int32) #bx_t has only the words those are selected by the generator
+            bz_t = np.ones_like(bx_t, dtype=theano.config.floatX) #so bz_t has all 1 for bx_t
+
+
+            #o, e, d = debug_func_enc(bx, by, bz) # o, e, d = debug_func_enc(bx, by, bz)
+            o, e, d = debug_func_enc(bx_t, by, bz_t)
             encoder_time = time.time() - start_encode_time
             encode_total_time += encoder_time
             #bz,  o, e, d = eval_func(bx, by)
@@ -704,6 +731,9 @@ def main():
 
     if args.train:
         train_x, train_y = myio.read_annotations(args.train)
+        if args.debug :
+        	train_x = train_x[:100]
+        	train_y = train_y[:100]
         #print len(train_x), train_x[0], len(train_x[0])
         #exit()
         train_x = [ embedding_layer.map_to_ids(x)[:max_len] for x in train_x ]
